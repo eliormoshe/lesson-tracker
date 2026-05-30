@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>מעקב שיעורים</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230D0D0D'/%3E%3Crect x='0' y='24' width='64' height='16' fill='%237B0D1E'/%3E%3Crect x='3' y='26' width='5' height='12' rx='2' fill='%230D0D0D'/%3E%3Crect x='12' y='26' width='5' height='12' rx='2' fill='%230D0D0D'/%3E%3Crect x='47' y='26' width='5' height='12' rx='2' fill='%230D0D0D'/%3E%3Crect x='56' y='26' width='5' height='12' rx='2' fill='%230D0D0D'/%3E%3Cline x1='14' y1='9' x2='50' y2='55' stroke='%23F0DEC4' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='50' y1='9' x2='14' y2='55' stroke='%23F0DEC4' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='32' r='5.5' fill='%230D0D0D'/%3E%3Ccircle cx='32' cy='32' r='5' stroke='%23F0DEC4' stroke-width='1.5' fill='none'/%3E%3Ccircle cx='14' cy='9' r='6' stroke='%23F0DEC4' stroke-width='2.5' fill='none'/%3E%3Ccircle cx='50' cy='9' r='6' stroke='%23F0DEC4' stroke-width='2.5' fill='none'/%3E%3Ccircle cx='14' cy='55' r='6' stroke='%23F0DEC4' stroke-width='2.5' fill='none'/%3E%3Ccircle cx='50' cy='55' r='6' stroke='%23F0DEC4' stroke-width='2.5' fill='none'/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230D0D0D'/%3E%3Crect x='0' y='24' width='64' height='16' fill='%237B0D1E'/%3E%3Crect x='3' y='26' width='5' height='12' rx='2' fill='%230D0D0D'/%3E%3Crect x='12' y='26' width='5' height='12' rx='2' fill='%230D0D0D'/%3E%3Crect x='47' y='26' width='5' height='12' rx='2' fill='%230D0D0D'/%3E%3Crect x='56' y='26' width='5' height='12' rx='2' fill='%230D0D0D'/%3E%3Cline x1='14' y1='9' x2='50' y2='55' stroke='%23F0DEC4' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='50' y1='9' x2='14' y2='55' stroke='%23F0DEC4' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='32' r='5.5' fill='%230D0D0D'/%3E%3Ccircle cx='32' cy='32' r='5' stroke='%23F0DEC4' stroke-width='1.5' fill='none'/%3E%3Ccircle cx='14' cy='9' r='6' stroke='%23F0DEC4' stroke-width='2.5' fill='none'/%3E%3Ccircle cx='50' cy='9' r='6' stroke='%23F0DEC4' stroke-width='2.5' fill='none'/%3E%3Ccircle cx='14' cy='55' r='6' stroke='%23F0DEC4' stroke-width='2.5' fill='none'/%3E%3Ccircle cx='50' cy='55' r='6' stroke='%23F0DEC4' stroke-width='2.5' fill='none'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -248,6 +250,46 @@ const HE_MON_SHORT = ["ינו׳", "פבר׳", "מרץ", "אפר׳", "מאי", "�
 const monthKey = (d) => `${d.getFullYear()}-${d.getMonth()}`;
 const monthLabel = (y, m) => `${HE_MONTHS_FULL[m]} ${y}`;
 const STUDENT_COLORS = ["#6D5EF6", "#10B981", "#F59E0B", "#EC5A8D", "#3B9EF5"];
+
+/* ============ app logo ============ */
+function AppLogo({ size = 36 }) {
+  const r = size * 0.22;
+  const half = size / 2;
+  const stripY = size * 0.37, stripH = size * 0.26;
+  const holeW = size * 0.09, holeH = stripH * 0.75;
+  const holeR = size * 0.03;
+  const holeY = stripY + (stripH - holeH) / 2;
+  const bladeStroke = size * 0.065;
+  const handleR = size * 0.11;
+  const pivotR = size * 0.09;
+  const p1x = size * 0.22, p1y = size * 0.14, p2x = size * 0.78;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
+      {/* bg */}
+      <rect width={size} height={size} rx={r} fill="#0D0D0D" />
+      {/* film strip */}
+      <rect x={0} y={stripY} width={size} height={stripH} fill="#7B0D1E" />
+      {/* holes left */}
+      <rect x={size*0.05} y={holeY} width={holeW} height={holeH} rx={holeR} fill="#0D0D0D" />
+      <rect x={size*0.18} y={holeY} width={holeW} height={holeH} rx={holeR} fill="#0D0D0D" />
+      {/* holes right */}
+      <rect x={size*0.73} y={holeY} width={holeW} height={holeH} rx={holeR} fill="#0D0D0D" />
+      <rect x={size*0.86} y={holeY} width={holeW} height={holeH} rx={holeR} fill="#0D0D0D" />
+      {/* blade 1 */}
+      <line x1={p1x} y1={p1y} x2={p2x} y2={size-p1y} stroke="#F0DEC4" strokeWidth={bladeStroke} strokeLinecap="round" />
+      {/* blade 2 */}
+      <line x1={p2x} y1={p1y} x2={p1x} y2={size-p1y} stroke="#F0DEC4" strokeWidth={bladeStroke} strokeLinecap="round" />
+      {/* pivot */}
+      <circle cx={half} cy={half} r={pivotR*1.2} fill="#0D0D0D" />
+      <circle cx={half} cy={half} r={pivotR} stroke="#F0DEC4" strokeWidth={size*0.03} fill="none" />
+      {/* handles */}
+      <circle cx={p1x} cy={p1y} r={handleR} stroke="#F0DEC4" strokeWidth={size*0.04} fill="none" />
+      <circle cx={p2x} cy={p1y} r={handleR} stroke="#F0DEC4" strokeWidth={size*0.04} fill="none" />
+      <circle cx={p1x} cy={size-p1y} r={handleR} stroke="#F0DEC4" strokeWidth={size*0.04} fill="none" />
+      <circle cx={p2x} cy={size-p1y} r={handleR} stroke="#F0DEC4" strokeWidth={size*0.04} fill="none" />
+    </svg>
+  );
+}
 
 /* ============ icons (clean stroke set) ============ */
 function Icon({ name, size = 24, filled = false, stroke = 2 }) {
@@ -589,9 +631,7 @@ function Sidebar({ active, onChange, students, activeId, onSelect, onAddStudent,
   return (
     <aside className="sidebar">
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "2px 6px 20px" }}>
-        <span style={{ width: 36, height: 36, borderRadius: 11, background: "var(--accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Icon name="lessons" size={20} stroke={2.2} />
-        </span>
+        <AppLogo size={36} />
         <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-.02em" }}>מעקב שיעורים</span>
       </div>
 
