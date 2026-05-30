@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>מעקב שיעורים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --accent: #6D5EF6;
+    --accent-soft: #EEECFE;
+    --accent-ink: #5246C8;
+    --green: #10B981;
+    --green-soft: #DCFCE9;
+    --green-ink: #0B7A57;
+    --amber: #F59E0B;
+    --amber-soft: #FEF3D6;
+    --amber-ink: #B26C04;
+    --ink: #18181B;
+    --ink-2: #71717A;
+    --line: #EEEEF0;
+    --line-2: #E6E6EA;
+    --shadow-card: 0 1px 2px rgba(24,24,27,.04), 0 6px 20px rgba(24,24,27,.05);
+    --shadow-pop: 0 8px 30px rgba(24,24,27,.14), 0 2px 8px rgba(24,24,27,.08);
+    --shadow-fab: 0 10px 24px rgba(109,94,246,.42);
+    --r-2xl: 24px;
+    --r-xl: 18px;
+    --r-lg: 14px;
+    --surface-2: #F4F4F6;
+    --surface-3: #EDEDF0;
+    --topbar-bg: rgba(250,250,250,.92);
+    --tabbar-bg: rgba(255,255,255,.88);
+    --dropdown-bg: #FFFFFF;
+    --input-bg: #FFFFFF;
+    --input-border: #E6E6EA;
+    --done-chip-bg: #EEF0F4;
+    --done-chip-fg: #5B6472;
+    --empty-icon-bg: #F1F1F3;
+    --text-xmuted: #B6B6BC;
+    --sheet-handle: #D8D8DE;
+    --sheet-close: #EDEDF0;
+    font-family: 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  html[data-theme="dark"] {
+    --bg: #0F0F12;
+    --card: #18181C;
+    --accent: #7B6CF8;
+    --accent-soft: #23205A;
+    --accent-ink: #AFA4FA;
+    --green: #10B981;
+    --green-soft: #0C3026;
+    --green-ink: #52D9A8;
+    --amber: #F59E0B;
+    --amber-soft: #3A2200;
+    --amber-ink: #FBB83A;
+    --ink: #EEEEF2;
+    --ink-2: #7A7A88;
+    --line: #242428;
+    --line-2: #2E2E34;
+    --shadow-card: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35);
+    --shadow-pop: 0 8px 30px rgba(0,0,0,.6), 0 2px 8px rgba(0,0,0,.4);
+    --shadow-fab: 0 10px 24px rgba(109,94,246,.6);
+    --surface-2: #222228;
+    --surface-3: #1C1C22;
+    --topbar-bg: rgba(12,12,16,.95);
+    --tabbar-bg: rgba(12,12,16,.95);
+    --dropdown-bg: #1E1E26;
+    --input-bg: #1A1A22;
+    --input-border: #36363E;
+    --done-chip-bg: #1E2228;
+    --done-chip-fg: #7A8898;
+    --empty-icon-bg: #1E1E24;
+    --text-xmuted: #46465A;
+    --sheet-handle: #3A3A42;
+    --sheet-close: #28282E;
+  }
+
+  html[data-theme="dark"] body {
+    background: radial-gradient(1200px 600px at 50% -10%, #141418 0%, #101014 60%, #0C0C10 100%);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+
+  body {
+    font-family: 'Rubik', sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #EFEFF4 0%, #E4E4EA 60%, #DEDEE4 100%);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  #root { height: 100%; }
+
+  /* stage */
+  .stage {
+    height: 100dvh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* ---------- MOBILE container ---------- */
+  .app.mobile {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    height: 100dvh;
+    background: var(--bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 560px) {
+    .stage { padding: 28px; }
+    .app.mobile {
+      height: min(900px, calc(100dvh - 56px));
+      border-radius: 44px;
+      box-shadow:
+        0 0 0 11px #111114,
+        0 0 0 13px #2a2a30,
+        0 40px 80px -20px rgba(20,20,30,.55);
+    }
+    .app.mobile::after {
+      content: "";
+      position: absolute;
+      top: 12px; left: 50%; transform: translateX(-50%);
+      width: 118px; height: 30px;
+      background: #111114;
+      border-radius: 18px;
+      z-index: 60;
+      pointer-events: none;
+    }
+    .app.mobile .topbar { padding-top: 50px; }
+  }
+
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 18px 18px 120px;
+    scroll-behavior: smooth;
+  }
+  .scroll::-webkit-scrollbar { width: 0; height: 0; }
+
+  /* mobile sticky top bar (student switcher) */
+  .topbar {
+    position: relative;
+    z-index: 45;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px 12px;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(16px) saturate(1.3);
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* ---------- DESKTOP container ---------- */
+  .app.desktop {
+    position: relative;
+    width: min(1160px, calc(100% - 56px));
+    height: min(880px, calc(100dvh - 56px));
+    background: var(--bg);
+    border-radius: 32px;
+    overflow: hidden;
+    display: flex; /* RTL: first child (sidebar) sits on the right */
+    box-shadow: 0 34px 80px -28px rgba(20,20,30,.45), 0 0 0 1px rgba(20,20,30,.04);
+  }
+  .app.desktop .sidebar {
+    width: 268px;
+    flex-shrink: 0;
+    background: var(--card);
+    border-left: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 18px 20px;
+  }
+  .app.desktop .main {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 32px 38px 48px;
+    scroll-behavior: smooth;
+  }
+  .app.desktop .main::-webkit-scrollbar { width: 0; }
+  .navitem {
+    display: flex; align-items: center; gap: 13px;
+    width: 100%; padding: 12px 14px; border-radius: 14px;
+    font-size: 15px; font-weight: 600; color: var(--ink-2);
+    transition: background .16s ease, color .16s ease;
+  }
+  .navitem:hover { background: var(--surface-2); }
+  .navitem.on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+
+  /* numbers */
+  .tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select, textarea { font-family: inherit; }
+
+  @keyframes sheetUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn {
+    0% { transform: scale(.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .screen-in { animation: screenIn .26s cubic-bezier(.2,.7,.2,1); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+/* ════════════════════════════════════════════════════════════════
+   מעקב שיעורים — קובץ מאוחד (UI מ-Claude Design + שכבת localStorage)
+   ════════════════════════════════════════════════════════════════ */
+
+/* ============ helpers ============ */
+const fmt = (n) => "₪" + Math.round(n).toLocaleString("he-IL");
+
+const HE_MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+const HE_MON_SHORT = ["ינו׳", "פבר׳", "מרץ", "אפר׳", "מאי", "יוני", "יולי", "אוג׳", "ספט׳", "אוק׳", "נוב׳", "דצמ׳"];
+const monthKey = (d) => `${d.getFullYear()}-${d.getMonth()}`;
+const monthLabel = (y, m) => `${HE_MONTHS_FULL[m]} ${y}`;
+const STUDENT_COLORS = ["#6D5EF6", "#10B981", "#F59E0B", "#EC5A8D", "#3B9EF5"];
+
+/* ============ icons (clean stroke set) ============ */
+function Icon({ name, size = 24, filled = false, stroke = 2 }) {
+  const common = {
+    width: size, height: size, viewBox: "0 0 24 24",
+    fill: "none", stroke: "currentColor",
+    strokeWidth: stroke, strokeLinecap: "round", strokeLinejoin: "round",
+  };
+  const paths = {
+    home: <><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" /></>,
+    moon: <path d="M21 12.5A9 9 0 1 1 11.5 3a7 7 0 0 0 9.5 9.5z" />,
+    sun: <><circle cx="12" cy="12" r="4.5" /><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" /></>,
+    trash: <><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" /></>,
+    lessons: <><rect x="3.5" y="4.5" width="17" height="16" rx="3" /><path d="M3.5 9h17M8 2.5v4M16 2.5v4" /><path d="M7.5 13h2M11 13h2M14.5 13h2M7.5 16.5h2M11 16.5h2" /></>,
+    payments: <><rect x="2.5" y="5.5" width="19" height="13" rx="3" /><path d="M2.5 10h19" /><path d="M6 14.5h3" /></>,
+    settings: <><circle cx="12" cy="12" r="3.2" /><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.7 5.3l-1.7 1.7M7 17l-1.7 1.7M18.7 18.7 17 17M7 7 5.3 5.3" /></>,
+    plus: <path d="M12 5v14M5 12h14" />,
+    check: <path d="M4.5 12.5 9 17l10.5-11" />,
+    chevron: <path d="M15 5l-7 7 7 7" />,
+    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3 2" /></>,
+    cash: <><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.4" /></>,
+    bit: <><path d="M12 3v18" /><path d="M7 7h7a3 3 0 0 1 0 6H7zM7 13h8a3 3 0 0 1 0 6H7z" /></>,
+    transfer: <><path d="M4 8h13l-3-3M20 16H7l3 3" /></>,
+    phone: <path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" />,
+    user: <><circle cx="12" cy="8" r="3.6" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></>,
+    bell: <><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z" /><path d="M10 19a2 2 0 0 0 4 0" /></>,
+    sparkle: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />,
+    arrowUp: <path d="M12 19V5M6 11l6-6 6 6" />,
+    summary: <><path d="M5 21V10M12 21V4M19 21v-7" /><path d="M3 21h18" /></>,
+    chevronDown: <path d="M6 9l6 6 6-6" />,
+    addUser: <><circle cx="9" cy="8" r="3.4" /><path d="M3.5 20c.9-3.2 3.1-4.6 5.5-4.6 1 0 2 .25 2.8.7" /><path d="M17.5 14v6M14.5 17h6" /></>,
+    calendar: <><rect x="3.5" y="4.5" width="17" height="16" rx="3" /><path d="M3.5 9h17M8 2.5v4M16 2.5v4" /></>,
+  };
+  return <svg {...common}>{paths[name]}</svg>;
+}
+
+/* ============ status chip ============ */
+function StatusChip({ status }) {
+  const map = {
+    scheduled: { t: "מתוזמן", bg: "var(--accent-soft)", fg: "var(--accent-ink)" },
+    done:      { t: "בוצע",   bg: "var(--done-chip-bg)", fg: "var(--done-chip-fg)" },
+    cancelled: { t: "בוטל",   bg: "#F1F1F3",            fg: "#8A8A93" },
+    paid:      { t: "שולם",   bg: "var(--green-soft)",  fg: "var(--green-ink)" },
+    pending:   { t: "ממתין",  bg: "var(--amber-soft)",  fg: "var(--amber-ink)" },
+  };
+  const s = map[status];
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      background: s.bg, color: s.fg,
+      fontSize: 12.5, fontWeight: 600, lineHeight: 1,
+      padding: "6px 11px", borderRadius: 999, whiteSpace: "nowrap",
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: 999, background: "currentColor", opacity: .85 }} />
+      {s.t}
+    </span>
+  );
+}
+
+/* ============ payment method chip ============ */
+function MethodChip({ method }) {
+  const map = {
+    cash:     { t: "מזומן", icon: "cash" },
+    bit:      { t: "ביט",   icon: "bit" },
+    transfer: { t: "העברה", icon: "transfer" },
+  };
+  const m = map[method] || map.cash;
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      background: "var(--surface-2)", color: "var(--ink-2)",
+      fontSize: 12.5, fontWeight: 600, lineHeight: 1,
+      padding: "6px 10px", borderRadius: 999,
+    }}>
+      <Icon name={m.icon} size={14} stroke={2.2} />
+      {m.t}
+    </span>
+  );
+}
+
+/* ============ generic card ============ */
+function Card({ children, style, onClick, ...rest }) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: "var(--card)",
+        borderRadius: "var(--r-2xl)",
+        boxShadow: "var(--shadow-card)",
+        ...style,
+      }}
+      {...rest}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ============ section heading ============ */
+function SectionTitle({ children, action }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "22px 4px 12px" }}>
+      <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "var(--ink)", letterSpacing: "-.01em" }}>{children}</h2>
+      {action}
+    </div>
+  );
+}
+
+/* ============ big touch button ============ */
+function BigButton({ children, variant = "primary", onClick, icon, style }) {
+  const base = {
+    display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+    width: "100%", padding: "18px 20px", borderRadius: 18,
+    fontSize: 16, fontWeight: 700, letterSpacing: "-.01em",
+    transition: "transform .12s ease, box-shadow .15s ease, background .15s ease",
+  };
+  const variants = {
+    primary: { background: "var(--accent)", color: "#fff", boxShadow: "0 8px 20px rgba(109,94,246,.32)" },
+    ghost:   { background: "var(--card)", color: "var(--ink)", boxShadow: "var(--shadow-card)" },
+    green:   { background: "var(--green)", color: "#fff", boxShadow: "0 8px 20px rgba(16,185,129,.30)" },
+    soft:    { background: "var(--accent-soft)", color: "var(--accent-ink)" },
+  };
+  return (
+    <button
+      onClick={onClick}
+      onMouseDown={(e) => (e.currentTarget.style.transform = "scale(.97)")}
+      onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      style={{ ...base, ...variants[variant], ...style }}
+    >
+      {icon && <Icon name={icon} size={20} stroke={2.4} />}
+      {children}
+    </button>
+  );
+}
+
+/* ============ avatar ============ */
+function Avatar({ name, color, size = 36, fontSize }) {
+  return (
+    <span style={{
+      width: size, height: size, borderRadius: 999, flexShrink: 0,
+      background: color || "var(--accent)", color: "#fff",
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      fontSize: fontSize || size * 0.42, fontWeight: 700, lineHeight: 1,
+    }}>
+      {(name || "?").trim().charAt(0)}
+    </span>
+  );
+}
+
+/* ============ responsive hook ============ */
+function useIsDesktop(bp = 900) {
+  const [d, setD] = React.useState(() => (typeof window !== "undefined" ? window.innerWidth >= bp : false));
+  React.useEffect(() => {
+    const mq = window.matchMedia(`(min-width:${bp}px)`);
+    const h = (e) => setD(e.matches);
+    setD(mq.matches);
+    mq.addEventListener("change", h);
+    return () => mq.removeEventListener("change", h);
+  }, [bp]);
+  return d;
+}
+
+const DARK_KEY = "lesson-tracker-dark";
+const ThemeCtx = React.createContext({ dark: false, toggleDark: () => {} });
+const useTheme = () => React.useContext(ThemeCtx);
+
+function useDarkMode() {
+  const [dark, setDark] = React.useState(() => {
+    const stored = localStorage.getItem(DARK_KEY);
+    if (stored !== null) return stored === "true";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+  React.useEffect(() => {
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    localStorage.setItem(DARK_KEY, String(dark));
+  }, [dark]);
+  return [dark, () => setDark((d) => !d)];
+}
+
+const NAV = [
+  ["home", "ראשי", "home"],
+  ["lessons", "שיעורים", "lessons"],
+  ["payments", "תשלומים", "payments"],
+  ["summary", "סיכום", "summary"],
+  ["settings", "הגדרות", "settings"],
+];
+
+/* ============ modal sheet shell (responsive) ============ */
+function Sheet({ title, onClose, children, footer, centered }) {
+  const panelStyle = centered
+    ? { position: "relative", width: "min(440px, calc(100% - 48px))", maxHeight: "86%", overflowY: "auto",
+        background: "var(--bg)", borderRadius: 26, padding: "12px 22px 24px",
+        animation: "popIn .26s cubic-bezier(.2,.8,.2,1)", boxShadow: "var(--shadow-pop)" }
+    : { position: "relative", background: "var(--bg)", borderTopLeftRadius: 28, borderTopRightRadius: 28,
+        padding: "10px 20px 24px", maxHeight: "90%", overflowY: "auto",
+        animation: "sheetUp .32s cubic-bezier(.2,.8,.2,1)", boxShadow: "var(--shadow-pop)" };
+  return (
+    <div style={{ position: "absolute", inset: 0, zIndex: 100, display: "flex", flexDirection: "column", justifyContent: centered ? "center" : "flex-end", alignItems: "center" }}>
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(20,20,28,.45)", animation: "fadeIn .2s ease", backdropFilter: "blur(2px)" }} />
+      <div style={panelStyle}>
+        {!centered && <div style={{ width: 40, height: 5, borderRadius: 999, background: "var(--sheet-handle)", margin: "0 auto 16px" }} />}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18, marginTop: centered ? 8 : 0 }}>
+          <h2 style={{ margin: 0, fontSize: 21, fontWeight: 800, letterSpacing: "-.02em" }}>{title}</h2>
+          <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: 999, background: "var(--sheet-close)", color: "var(--ink-2)", fontSize: 18, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+        </div>
+        {children}
+        {footer && <div style={{ marginTop: 22 }}>{footer}</div>}
+      </div>
+    </div>
+  );
+}
+
+const labelStyle = { fontSize: 13.5, fontWeight: 600, color: "var(--ink-2)", marginBottom: 8, display: "block" };
+const fieldStyle = { width: "100%", padding: "15px 16px", borderRadius: 15, border: "1.5px solid var(--input-border)", background: "var(--input-bg)", fontSize: 16, fontWeight: 600, color: "var(--ink)", outline: "none" };
+
+/* ============ student switcher (pill + dropdown) ============ */
+function StudentSwitcher({ students, activeId, onSelect, onAddStudent, variant }) {
+  const [open, setOpen] = React.useState(false);
+  const active = students.find((s) => s.id === activeId) || students[0];
+  const isBlock = variant === "block";
+
+  // אין תלמידים — מציגים כפתור הוספה במקום ה-pill (מונע קריסה על active.name)
+  if (!active) {
+    return (
+      <button onClick={onAddStudent} style={isBlock ? {
+        width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 9, padding: "12px",
+        borderRadius: 16, background: "var(--accent-soft)", color: "var(--accent-ink)", fontWeight: 700, fontSize: 14.5,
+      } : {
+        display: "flex", alignItems: "center", gap: 8, padding: "8px 14px 8px 12px",
+        borderRadius: 999, background: "var(--accent-soft)", color: "var(--accent-ink)", fontWeight: 700, fontSize: 14,
+      }}>
+        <Icon name="addUser" size={isBlock ? 19 : 17} stroke={2.2} /> הוסף תלמיד
+      </button>
+    );
+  }
+
+  const trigger = isBlock ? (
+    <button onClick={() => setOpen((o) => !o)} style={{
+      width: "100%", display: "flex", alignItems: "center", gap: 11, padding: "10px 12px",
+      borderRadius: 16, background: "var(--surface-2)", border: "1px solid var(--line)", transition: "background .15s",
+    }}>
+      <Avatar name={active.name} color={active.color} size={38} />
+      <div style={{ flex: 1, minWidth: 0, textAlign: "right" }}>
+        <div style={{ fontSize: 15, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{active.name}</div>
+        <div style={{ fontSize: 11.5, color: "var(--ink-2)", fontWeight: 500 }}>תלמיד פעיל</div>
+      </div>
+      <span style={{ color: "var(--ink-2)", transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }}><Icon name="chevronDown" size={18} stroke={2.3} /></span>
+    </button>
+  ) : (
+    <button onClick={() => setOpen((o) => !o)} style={{
+      display: "flex", alignItems: "center", gap: 9, padding: "6px 12px 6px 8px",
+      borderRadius: 999, background: "var(--card)", boxShadow: "var(--shadow-card)",
+    }}>
+      <Avatar name={active.name} color={active.color} size={30} />
+      <span style={{ fontSize: 15, fontWeight: 700, maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{active.name}</span>
+      <span style={{ color: "var(--ink-2)", transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }}><Icon name="chevronDown" size={16} stroke={2.4} /></span>
+    </button>
+  );
+
+  return (
+    <div style={{ position: "relative", width: isBlock ? "100%" : "auto" }}>
+      {trigger}
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 70 }} />
+          <div style={{
+            position: "absolute", zIndex: 80, top: "calc(100% + 8px)",
+            [isBlock ? "left" : "right"]: 0, width: isBlock ? "100%" : 248,
+            background: "var(--dropdown-bg)", borderRadius: 18, boxShadow: "var(--shadow-pop)", border: "1px solid var(--line)",
+            padding: 7, animation: "popIn .16s ease",
+          }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ink-2)", padding: "6px 10px 8px" }}>התלמידים שלי</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2, maxHeight: 280, overflowY: "auto" }}>
+              {students.map((s) => {
+                const on = s.id === activeId;
+                return (
+                  <button key={s.id} onClick={() => { onSelect(s.id); setOpen(false); }} style={{
+                    display: "flex", alignItems: "center", gap: 11, padding: "9px 10px", borderRadius: 12,
+                    background: on ? "var(--accent-soft)" : "transparent", textAlign: "right",
+                  }}>
+                    <Avatar name={s.name} color={s.color} size={34} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14.5, fontWeight: 700, color: on ? "var(--accent-ink)" : "var(--ink)" }}>{s.name}</div>
+                      <div style={{ fontSize: 11.5, color: "var(--ink-2)", fontWeight: 500, direction: "ltr", textAlign: "right" }}>{s.phone}</div>
+                    </div>
+                    {on && <span style={{ color: "var(--accent)" }}><Icon name="check" size={18} stroke={2.6} /></span>}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ height: 1, background: "var(--line)", margin: "7px 4px" }} />
+            <button onClick={() => { setOpen(false); onAddStudent(); }} style={{
+              display: "flex", alignItems: "center", gap: 11, padding: "10px", borderRadius: 12, width: "100%",
+              color: "var(--accent)", fontWeight: 700, fontSize: 14.5, textAlign: "right",
+            }}>
+              <span style={{ width: 34, height: 34, borderRadius: 999, background: "var(--accent-soft)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="addUser" size={19} stroke={2.2} />
+              </span>
+              תלמיד חדש
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ============ dark mode toggle ============ */
+function DarkToggle({ style }) {
+  const { dark, toggleDark } = useTheme();
+  return (
+    <button onClick={toggleDark} style={{
+      width: 42, height: 42, borderRadius: 999, background: "var(--card)", boxShadow: "var(--shadow-card)",
+      display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-2)", flexShrink: 0,
+      transition: "color .2s", ...style,
+    }}>
+      <Icon name={dark ? "sun" : "moon"} size={20} stroke={2} />
+    </button>
+  );
+}
+
+/* ============ mobile top bar ============ */
+function MobileHeader({ students, activeId, onSelect, onAddStudent }) {
+  return (
+    <div className="topbar">
+      <StudentSwitcher students={students} activeId={activeId} onSelect={onSelect} onAddStudent={onAddStudent} variant="pill" />
+      <DarkToggle />
+    </div>
+  );
+}
+
+/* ============ desktop sidebar ============ */
+function Sidebar({ active, onChange, students, activeId, onSelect, onAddStudent, lessons, today }) {
+  const now = today || new Date();
+  const allS = lessons || [];
+  const incomeS = allS.filter((l) => l.status === "done" && l.paid).reduce((s, l) => s + l.price, 0);
+  const nextMS = allS.filter((l) => l.status === "done" && !l.paid).reduce((s, l) => s + l.price, 0);
+  return (
+    <aside className="sidebar">
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "2px 6px 20px" }}>
+        <span style={{ width: 36, height: 36, borderRadius: 11, background: "var(--accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="lessons" size={20} stroke={2.2} />
+        </span>
+        <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-.02em" }}>מעקב שיעורים</span>
+      </div>
+
+      <StudentSwitcher students={students} activeId={activeId} onSelect={onSelect} onAddStudent={onAddStudent} variant="block" />
+
+      <nav style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 22 }}>
+        {NAV.map(([k, t, ic]) => (
+          <button key={k} className={"navitem" + (active === k ? " on" : "")} onClick={() => onChange(k)}>
+            <Icon name={ic} size={21} stroke={active === k ? 2.3 : 2} /> {t}
+          </button>
+        ))}
+      </nav>
+
+      <div style={{ marginTop: "auto" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink-2)", margin: "0 4px 9px" }}>כל התלמידים</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 16 }}>
+          <div style={{ background: "var(--card)", borderRadius: 14, padding: "12px 13px", boxShadow: "var(--shadow-card)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 7, height: 7, borderRadius: 999, background: "var(--green)" }} />
+              <span style={{ fontSize: 11.5, color: "var(--ink-2)", fontWeight: 600 }}>סה״כ התקבל</span>
+            </div>
+            <div className="tnum" style={{ fontSize: 20, fontWeight: 900, color: "var(--green-ink)", marginTop: 5, letterSpacing: "-.02em" }}>{fmt(incomeS)}</div>
+          </div>
+          <div style={{ background: "var(--card)", borderRadius: 14, padding: "12px 13px", boxShadow: "var(--shadow-card)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 7, height: 7, borderRadius: 999, background: "var(--amber)" }} />
+              <span style={{ fontSize: 11.5, color: "var(--ink-2)", fontWeight: 600 }}>ממתין לתשלום</span>
+            </div>
+            <div className="tnum" style={{ fontSize: 20, fontWeight: 900, color: "var(--amber-ink)", marginTop: 5, letterSpacing: "-.02em" }}>{fmt(nextMS)}</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "2px 6px" }}>
+          <span style={{ fontSize: 12.5, fontWeight: 500, color: "var(--ink-2)" }}>גרסה 1.2</span>
+          <DarkToggle style={{ width: 36, height: 36, boxShadow: "none", background: "var(--surface-2)" }} />
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ============ mobile bottom tab bar ============ */
+function TabBar({ active, onChange }) {
+  return (
+    <div style={{
+      position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 50,
+      background: "var(--tabbar-bg)", backdropFilter: "blur(18px) saturate(1.4)",
+      borderTop: "1px solid var(--line)", display: "grid", gridTemplateColumns: "repeat(5,1fr)",
+      padding: "8px 4px calc(8px + env(safe-area-inset-bottom))",
+    }}>
+      {NAV.map(([k, t, ic]) => {
+        const on = active === k;
+        return (
+          <button key={k} onClick={() => onChange(k)} style={{
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+            padding: "8px 0", color: on ? "var(--accent)" : "#A1A1AA", transition: "color .18s ease",
+          }}>
+            <Icon name={ic} size={23} stroke={on ? 2.4 : 2} />
+            <span style={{ fontSize: 10.5, fontWeight: on ? 700 : 600 }}>{t}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ============ add student modal ============ */
+function AddStudentModal({ onClose, onAdd, centered }) {
+  const [name, setName] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [price, setPrice] = React.useState(160);
+  const [duration, setDuration] = React.useState(90);
+  const canSave = name.trim().length > 0;
+  return (
+    <Sheet title="תלמיד חדש" onClose={onClose} centered={centered}
+      footer={
+        <BigButton variant={canSave ? "primary" : "soft"} icon="addUser"
+          onClick={() => canSave && onAdd({ name: name.trim(), phone: phone.trim(), price: +price, duration: +duration })}
+          style={canSave ? {} : { opacity: .6, cursor: "default" }}>
+          הוספת תלמיד
+        </BigButton>}>
+      <label style={labelStyle}>שם התלמיד</label>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="לדוגמה: דנה" style={{ ...fieldStyle, marginBottom: 16 }} autoFocus />
+      <label style={labelStyle}>טלפון</label>
+      <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="050-000-0000" style={{ ...fieldStyle, marginBottom: 16, direction: "ltr", textAlign: "right" }} />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div>
+          <label style={labelStyle}>מחיר ברירת מחדל</label>
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontWeight: 700, color: "var(--ink-2)" }}>₪</span>
+            <input type="number" className="tnum" value={price} onChange={(e) => setPrice(e.target.value)} style={{ ...fieldStyle, paddingRight: 34 }} />
+          </div>
+        </div>
+        <div>
+          <label style={labelStyle}>משך (דק׳)</label>
+          <input type="number" className="tnum" value={duration} onChange={(e) => setDuration(e.target.value)} style={fieldStyle} />
+        </div>
+      </div>
+    </Sheet>
+  );
+}
+
+/* ============ date helpers ============ */
+const HE_DAYS = ["יום א׳", "יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת"];
+function parseDT(s) { return new Date(s); }
+function dDay(s) { return HE_DAYS[parseDT(s).getDay()]; }
+function dDate(s) { const d = parseDT(s); return `${d.getDate()} ${HE_MON_SHORT[d.getMonth()]}`; }
+function dTime(s) { const d = parseDT(s); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }
+function dShort(s) { return `${dDay(s)} · ${dDate(s)}`; }
+
+/* ============ billing roll-up (collected on the 1st of the following month) ============ */
+function buildMonthly(lessons) {
+  const map = {};
+  lessons.filter((l) => l.status === "done").forEach((l) => {
+    const d = parseDT(l.datetime);
+    const k = `${d.getFullYear()}-${d.getMonth()}`;
+    if (!map[k]) map[k] = { y: d.getFullYear(), m: d.getMonth(), count: 0, total: 0, paidCount: 0 };
+    map[k].count++; map[k].total += l.price; if (l.paid) map[k].paidCount++;
+  });
+  return Object.values(map).map((o) => {
+    const nm = o.m === 11 ? 0 : o.m + 1;
+    return {
+      ...o,
+      paid: o.paidCount === o.count,
+      label: monthLabel(o.y, o.m),
+      collectShort: `1.${nm + 1}`,
+      collectFull: `1 ב${HE_MONTHS_FULL[nm]}`,
+    };
+  }).sort((a, b) => (b.y - a.y) || (b.m - a.m));
+}
+
+function nextCollection(lessons, today) {
+  const cm = today.getMonth(), cy = today.getFullYear();
+  const total = lessons.filter((l) => {
+    if (l.status !== "done") return false;
+    const d = parseDT(l.datetime);
+    return d.getMonth() === cm && d.getFullYear() === cy;
+  }).reduce((s, l) => s + l.price, 0);
+  const nm = cm === 11 ? 0 : cm + 1;
+  return { amount: total, dateFull: `1 ב${HE_MONTHS_FULL[nm]}`, thisMonth: HE_MONTHS_FULL[cm] };
+}
+
+/* ============ lesson card ============ */
+function LessonRow({ lesson, onMarkDone, onTogglePaid, onDelete }) {
+  const { datetime, status, price, note, duration, paid } = lesson;
+  const isDone = status === "done";
+  const [confirmDelete, setConfirmDelete] = React.useState(false);
+  return (
+    <Card style={{ padding: 16 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>{dShort(datetime)}</span>
+            <StatusChip status={status} />
+            {isDone && paid && <StatusChip status="paid" />}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 7, color: "var(--ink-2)", fontSize: 13.5, fontWeight: 500 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+              <Icon name="clock" size={15} stroke={2.1} /> {dTime(datetime)}
+            </span>
+            <span style={{ opacity: .5 }}>·</span>
+            <span>{duration} דק׳</span>
+          </div>
+          {note && <div style={{ marginTop: 8, fontSize: 13.5, color: "var(--ink-2)", lineHeight: 1.45, textWrap: "pretty" }}>{note}</div>}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+          <div className="tnum" style={{ fontSize: 20, fontWeight: 800, flexShrink: 0, color: status === "cancelled" ? "var(--text-xmuted)" : "var(--ink)", textDecoration: status === "cancelled" ? "line-through" : "none" }}>{fmt(price)}</div>
+          <button onClick={() => setConfirmDelete((v) => !v)} style={{ color: confirmDelete ? "#EF4444" : "var(--text-xmuted)", transition: "color .15s", padding: 2 }}>
+            <Icon name="trash" size={16} stroke={2} />
+          </button>
+        </div>
+      </div>
+
+      {confirmDelete && (
+        <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+          <button onClick={() => { onDelete(lesson.id); }} style={{
+            flex: 1, padding: "10px", borderRadius: 12, background: "#FEE2E2", color: "#DC2626",
+            fontSize: 13.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          }}>
+            <Icon name="trash" size={15} stroke={2.3} /> מחק שיעור
+          </button>
+          <button onClick={() => setConfirmDelete(false)} style={{
+            padding: "10px 14px", borderRadius: 12, background: "var(--surface-2)", color: "var(--ink-2)",
+            fontSize: 13.5, fontWeight: 600,
+          }}>ביטול</button>
+        </div>
+      )}
+
+      {!confirmDelete && status === "scheduled" && (
+        <RowAction color="green" icon="check" onClick={() => onMarkDone(lesson.id)}>סמן כבוצע</RowAction>
+      )}
+      {!confirmDelete && isDone && !paid && (
+        <RowAction color="amber" icon="payments" onClick={() => onTogglePaid(lesson.id)}>סמן כשולם</RowAction>
+      )}
+      {!confirmDelete && isDone && paid && (
+        <button onClick={() => onTogglePaid(lesson.id)} style={{
+          marginTop: 14, width: "100%", padding: "11px", borderRadius: 13,
+          background: "transparent", border: "1.5px solid var(--line-2)", color: "var(--ink-2)",
+          fontSize: 13.5, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+        }}>
+          <Icon name="check" size={16} stroke={2.6} /> שולם · בטל סימון
+        </button>
+      )}
+    </Card>
+  );
+}
+
+function RowAction({ color, icon, onClick, children }) {
+  const c = color === "green"
+    ? { bg: "var(--green-soft)", fg: "var(--green-ink)" }
+    : { bg: "var(--amber-soft)", fg: "var(--amber-ink)" };
+  return (
+    <button
+      onClick={onClick}
+      onMouseDown={(e) => (e.currentTarget.style.transform = "scale(.98)")}
+      onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      style={{
+        marginTop: 14, width: "100%", padding: "12px", borderRadius: 13,
+        background: c.bg, color: c.fg, fontSize: 14.5, fontWeight: 700,
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 7, transition: "transform .12s ease",
+      }}
+    >
+      <Icon name={icon} size={18} stroke={2.6} /> {children}
+    </button>
+  );
+}
+
+/* ============ stat tiles (shared) ============ */
+function StatTiles({ doneCount, received, nextLesson }) {
+  const tiles = [
+    { label: "שיעורים שבוצעו", value: String(doneCount), accent: "var(--accent)" },
+    { label: "סה״כ התקבל", value: fmt(received), accent: "var(--green)" },
+    { label: "השיעור הבא", value: nextLesson ? dTime(nextLesson.datetime) : "—", sub: nextLesson ? dShort(nextLesson.datetime) : "אין מתוזמן", accent: "var(--amber)" },
+  ];
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+      {tiles.map((t, i) => (
+        <Card key={i} style={{ padding: "14px 14px" }}>
+          <div style={{ width: 8, height: 8, borderRadius: 999, background: t.accent, marginBottom: 10 }} />
+          <div className="tnum" style={{ fontSize: t.sub ? 19 : 22, fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1 }}>{t.value}</div>
+          {t.sub && <div style={{ fontSize: 11.5, color: "var(--ink-2)", fontWeight: 600, marginTop: 3 }}>{t.sub}</div>}
+          <div style={{ fontSize: 12, color: "var(--ink-2)", fontWeight: 500, marginTop: t.sub ? 5 : 6, lineHeight: 1.25 }}>{t.label}</div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/* ============ hero (shared) ============ */
+function DebtHero({ studentName, debt, doneCount, received, big }) {
+  const balanced = debt <= 0;
+  return (
+    <div style={{
+      position: "relative", overflow: "hidden",
+      borderRadius: 28, padding: big ? "32px 28px 30px" : "30px 24px 28px",
+      background: balanced ? "linear-gradient(160deg, #10B981 0%, #0E9E73 100%)" : "linear-gradient(155deg, #7B6CF8 0%, #6D5EF6 48%, #5B4BE8 100%)",
+      boxShadow: balanced ? "0 16px 38px -10px rgba(16,185,129,.45)" : "0 16px 40px -10px rgba(109,94,246,.5)",
+      color: "#fff", height: big ? "100%" : "auto",
+    }}>
+      <div style={{ position: "absolute", top: -50, left: -30, width: 180, height: 180, borderRadius: 999, background: "rgba(255,255,255,.10)" }} />
+      <div style={{ position: "absolute", bottom: -70, left: 40, width: 160, height: 160, borderRadius: 999, background: "rgba(255,255,255,.07)" }} />
+      <div style={{ position: "relative" }}>
+        <div style={{ fontSize: 15, fontWeight: 500, opacity: .92 }}>{balanced ? "החשבון מאוזן" : `${studentName} חייב לך`}</div>
+        {balanced ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+            <span className="tnum" style={{ fontSize: 56, fontWeight: 900, letterSpacing: "-.03em", lineHeight: 1 }}>מאוזן</span>
+            <span style={{ width: 44, height: 44, borderRadius: 999, background: "rgba(255,255,255,.22)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="check" size={26} stroke={3} />
+            </span>
+          </div>
+        ) : (
+          <div className="tnum" style={{ fontSize: big ? 80 : 72, fontWeight: 900, letterSpacing: "-.04em", lineHeight: .98, marginTop: 6 }}>{fmt(debt)}</div>
+        )}
+        <div style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,.18)", padding: "7px 13px", borderRadius: 999, fontSize: 13, fontWeight: 600 }}>
+          <Icon name="sparkle" size={15} stroke={2.2} />
+          {balanced ? "כל השיעורים שולמו" : `${doneCount} שיעורים בוצעו · ${fmt(received)} התקבל`}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============ monthly summary list (shared) ============ */
+function MonthlyList({ months, compact }) {
+  if (months.length === 0) return <EmptyState icon="summary" text="אין עדיין נתונים חודשיים" />;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {months.map((mo) => (
+        <Card key={`${mo.y}-${mo.m}`} style={{ padding: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 15.5, fontWeight: 700 }}>{mo.label}</div>
+            <div style={{ fontSize: 12.5, color: "var(--ink-2)", fontWeight: 500, marginTop: 3 }}>{mo.count} שיעורים · <span className="tnum">{fmt(mo.total)}</span></div>
+          </div>
+          <div style={{ textAlign: "left", flexShrink: 0 }}>
+            {mo.paid
+              ? <StatusChip status="paid" />
+              : <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "var(--amber-soft)", color: "var(--amber-ink)", fontSize: 12, fontWeight: 600, padding: "6px 11px", borderRadius: 999, whiteSpace: "nowrap" }}>
+                  <Icon name="clock" size={13} stroke={2.3} /> ייגבה ב-{mo.collectShort}
+                </span>}
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/* ============================ HOME ============================ */
+function HomeScreen({ studentName, debt, doneCount, received, nextLesson, recent, months, onAddLesson, go, wide }) {
+  const actions = (
+    <div style={{ display: wide ? "flex" : "grid", flexDirection: "column", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <BigButton variant="primary" icon="plus" onClick={onAddLesson}>שיעור חדש</BigButton>
+      <BigButton variant="ghost" icon="summary" onClick={() => go("summary")}>הסיכום החודשי</BigButton>
+    </div>
+  );
+
+  if (wide) {
+    return (
+      <div className="screen-in">
+        <ScreenHeader title={`סקירת החשבון`} sub={`התלמיד: ${studentName}`} />
+        <div style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: 18, alignItems: "stretch" }}>
+          <DebtHero studentName={studentName} debt={debt} doneCount={doneCount} received={received} big />
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, justifyContent: "center" }}>{actions}</div>
+        </div>
+        <div style={{ marginTop: 18 }}>
+          <StatTiles doneCount={doneCount} received={received} nextLesson={nextLesson} />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, marginTop: 6 }}>
+          <div>
+            <SectionTitle action={<button onClick={() => go("lessons")} style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)" }}>הצג הכול</button>}>השיעורים האחרונים</SectionTitle>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {recent.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={() => {}} onTogglePaid={() => {}} />)}
+            </div>
+          </div>
+          <div>
+            <SectionTitle action={<button onClick={() => go("summary")} style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)" }}>לסיכום</button>}>סיכום חודשי</SectionTitle>
+            <MonthlyList months={months.slice(0, 4)} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // mobile
+  return (
+    <div className="screen-in">
+      <DebtHero studentName={studentName} debt={debt} doneCount={doneCount} received={received} />
+      <div style={{ marginTop: 16 }}>
+        <StatTiles doneCount={doneCount} received={received} nextLesson={nextLesson} />
+      </div>
+      <SectionTitle action={<button onClick={() => go("lessons")} style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)" }}>הצג הכול</button>}>השיעורים האחרונים</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {recent.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={() => {}} onTogglePaid={() => {}} />)}
+      </div>
+      <div style={{ marginTop: 18 }}>{actions}</div>
+    </div>
+  );
+}
+
+/* ============================ LESSONS ============================ */
+function LessonsScreen({ lessons, onMarkDone, onTogglePaid, onDelete, onAddLesson, wide }) {
+  const [tab, setTab] = React.useState("upcoming");
+  const upcoming = lessons.filter((l) => l.status === "scheduled").sort((a, b) => parseDT(a.datetime) - parseDT(b.datetime));
+  const history = lessons.filter((l) => l.status !== "scheduled").sort((a, b) => parseDT(b.datetime) - parseDT(a.datetime));
+  const list = tab === "upcoming" ? upcoming : history;
+  return (
+    <div className="screen-in">
+      <ScreenHeader title="שיעורים" sub={`${upcoming.length} מתוזמנים · ${history.length} בהיסטוריה`} />
+      <div style={{ display: "flex", gap: 4, background: "var(--surface-3)", padding: 4, borderRadius: 14, marginBottom: 18, maxWidth: wide ? 360 : "none" }}>
+        {[["upcoming", "קרובים"], ["history", "היסטוריה"]].map(([k, t]) => (
+          <button key={k} onClick={() => setTab(k)} style={{
+            flex: 1, padding: "10px", borderRadius: 11, fontSize: 14.5, fontWeight: 700,
+            background: tab === k ? "var(--card)" : "transparent", color: tab === k ? "var(--ink)" : "var(--ink-2)",
+            boxShadow: tab === k ? "0 1px 3px rgba(0,0,0,.08)" : "none", transition: "all .18s ease",
+          }}>{t}</button>
+        ))}
+      </div>
+      {list.length === 0
+        ? <EmptyState icon="lessons" text={tab === "upcoming" ? "אין שיעורים מתוזמנים" : "אין שיעורים בהיסטוריה"} />
+        : <div style={{ display: "grid", gridTemplateColumns: wide ? "1fr 1fr" : "1fr", gap: 12 }}>
+            {list.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={onMarkDone} onTogglePaid={onTogglePaid} onDelete={onDelete} />)}
+          </div>}
+      {!wide && <FAB onClick={onAddLesson} />}
+      {wide && <div style={{ marginTop: 18, maxWidth: 320 }}><BigButton variant="primary" icon="plus" onClick={onAddLesson}>שיעור חדש</BigButton></div>}
+    </div>
+  );
+}
+
+/* ============================ PAYMENTS (paid-lesson history, read-only) ============================ */
+function PaymentsScreen({ lessons, received, wide }) {
+  const paid = lessons.filter((l) => l.status === "done" && l.paid).sort((a, b) => parseDT(b.datetime) - parseDT(a.datetime));
+  return (
+    <div className="screen-in">
+      <ScreenHeader title="תשלומים" sub={`${paid.length} שיעורים ששולמו`} />
+      <Card style={{ padding: "18px 20px", marginBottom: 18, maxWidth: wide ? 460 : "none", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(155deg, #12C28D 0%, #0E9E73 100%)", color: "#fff", boxShadow: "0 14px 32px -12px rgba(16,185,129,.55)" }}>
+        <div>
+          <div style={{ fontSize: 13.5, fontWeight: 500, opacity: .92 }}>סה״כ התקבל</div>
+          <div className="tnum" style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-.03em", lineHeight: 1.05, marginTop: 2 }}>{fmt(received)}</div>
+        </div>
+        <span style={{ width: 52, height: 52, borderRadius: 999, background: "rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="payments" size={26} stroke={2.1} />
+        </span>
+      </Card>
+      {paid.length === 0
+        ? <EmptyState icon="payments" text="עדיין לא סומנו שיעורים ששולמו" />
+        : <div style={{ display: "grid", gridTemplateColumns: wide ? "1fr 1fr" : "1fr", gap: 12 }}>
+            {paid.map((p) => (
+              <Card key={p.id} style={{ padding: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 13, minWidth: 0 }}>
+                  <span style={{ width: 46, height: 46, borderRadius: 14, background: "var(--green-soft)", color: "var(--green-ink)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Icon name="arrowUp" size={22} stroke={2.4} />
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 15.5, fontWeight: 700 }}>{dShort(p.datetime)}</div>
+                    <div style={{ marginTop: 5 }}><StatusChip status="paid" /></div>
+                  </div>
+                </div>
+                <div className="tnum" style={{ fontSize: 21, fontWeight: 800, color: "var(--green-ink)", flexShrink: 0 }}>+{fmt(p.price)}</div>
+              </Card>
+            ))}
+          </div>}
+    </div>
+  );
+}
+
+/* ============================ SUMMARY ============================ */
+function SummaryScreen({ lessons, today, wide }) {
+  const months = buildMonthly(lessons);
+  const next = nextCollection(lessons, today);
+  return (
+    <div className="screen-in">
+      <ScreenHeader title="סיכום" sub="התשלום החודשי נגבה ב-1 לכל חודש" />
+
+      <div style={{ position: "relative", overflow: "hidden", maxWidth: wide ? 520 : "none",
+        borderRadius: 28, padding: "28px 26px", color: "#fff",
+        background: "linear-gradient(150deg, #FBB137 0%, #F59E0B 55%, #E08703 100%)",
+        boxShadow: "0 16px 40px -12px rgba(245,158,11,.5)" }}>
+        <div style={{ position: "absolute", top: -50, left: -20, width: 170, height: 170, borderRadius: 999, background: "rgba(255,255,255,.12)" }} />
+        <div style={{ position: "relative" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14.5, fontWeight: 600, opacity: .95 }}>
+            <Icon name="calendar" size={17} stroke={2.2} /> התשלום הקרוב — {next.dateFull}
+          </div>
+          <div className="tnum" style={{ fontSize: 64, fontWeight: 900, letterSpacing: "-.04em", lineHeight: 1, marginTop: 10 }}>{fmt(next.amount)}</div>
+          <div style={{ marginTop: 14, fontSize: 13.5, fontWeight: 500, lineHeight: 1.5, background: "rgba(255,255,255,.18)", padding: "10px 14px", borderRadius: 14, textWrap: "pretty" }}>
+            הכסף על שיעורי {next.thisMonth} מתקבל ב-{next.dateFull}. כל שיעור שבוצע בחודש נגבה ב-1 בחודש שאחריו.
+          </div>
+        </div>
+      </div>
+
+      <SectionTitle>פירוט חודשי</SectionTitle>
+      <div style={{ maxWidth: wide ? 620 : "none" }}>
+        <MonthlyList months={months} />
+      </div>
+    </div>
+  );
+}
+
+/* ============================ SETTINGS ============================ */
+function SettingsScreen({ student, onChange, onSave, saved, wide, allLessons, today }) {
+  const inputStyle = { width: "100%", border: "none", outline: "none", background: "transparent", fontSize: 16, fontWeight: 600, color: "var(--ink)", padding: 0 };
+  const Row = ({ label, icon, ltr, children, last }) => (
+    <div style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 14, borderBottom: last ? "none" : "1px solid var(--line)" }}>
+      <span style={{ width: 38, height: 38, borderRadius: 11, background: "var(--accent-soft)", color: "var(--accent-ink)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Icon name={icon} size={19} stroke={2.1} />
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12.5, color: "var(--ink-2)", fontWeight: 500, marginBottom: 2 }}>{label}</div>
+        {children}
+      </div>
+    </div>
+  );
+  // ===== סיכום חוצה-תלמידים (לפי מודל הגבייה: שיעור בחודש M נגבה ב-1 בחודש M+1) =====
+  const allL = allLessons || [];
+  const incomeThisMonth = allL.filter((l) => l.status === "done" && l.paid).reduce((s, l) => s + l.price, 0);
+  const nextMonthTotal = allL.filter((l) => l.status === "done" && !l.paid).reduce((s, l) => s + l.price, 0);
+
+  return (
+    <div className="screen-in" style={{ maxWidth: wide ? 540 : "none" }}>
+      <ScreenHeader title="הגדרות" sub={`פרטי ${student.name} וברירות מחדל`} />
+
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18, padding: "4px 4px" }}>
+        <Avatar name={student.name} color={student.color} size={52} />
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{student.name}</div>
+          <div style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 500, direction: "ltr", textAlign: "right" }}>{student.phone}</div>
+        </div>
+      </div>
+
+      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-2)", margin: "4px 4px 10px" }}>פרטי התלמיד</div>
+      <Card style={{ overflow: "hidden", marginBottom: 22 }}>
+        <Row label="שם התלמיד" icon="user">
+          <input style={inputStyle} value={student.name} onChange={(e) => onChange("name", e.target.value)} />
+        </Row>
+        <Row label="טלפון" icon="phone" last>
+          <input style={{ ...inputStyle, direction: "ltr", textAlign: "right" }} value={student.phone} onChange={(e) => onChange("phone", e.target.value)} />
+        </Row>
+      </Card>
+
+      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-2)", margin: "4px 4px 10px" }}>ברירות מחדל לשיעור</div>
+      <Card style={{ overflow: "hidden", marginBottom: 26 }}>
+        <Row label="מחיר ברירת מחדל" icon="payments">
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "var(--ink-2)" }}>₪</span>
+            <input type="number" className="tnum" style={inputStyle} value={student.price} onChange={(e) => onChange("price", e.target.value)} />
+          </div>
+        </Row>
+        <Row label="משך ברירת מחדל" icon="clock" last>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <input type="number" className="tnum" style={inputStyle} value={student.duration} onChange={(e) => onChange("duration", e.target.value)} />
+            <span style={{ fontSize: 15, fontWeight: 600, color: "var(--ink-2)" }}>דק׳</span>
+          </div>
+        </Row>
+      </Card>
+
+      <BigButton variant={saved ? "green" : "primary"} icon={saved ? "check" : null} onClick={onSave}>{saved ? "נשמר" : "שמירה"}</BigButton>
+
+      {!wide && <>
+      {/* ===== סיכום כל התלמידים (מובייל בלבד; בדסקטופ זה בסיידבר) ===== */}
+      <div style={{ height: 1, background: "var(--line)", margin: "28px 4px 20px" }} />
+      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-2)", margin: "4px 4px 12px" }}>סיכום כל התלמידים</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <Card style={{ padding: "16px 16px" }}>
+          <div style={{ width: 8, height: 8, borderRadius: 999, background: "var(--green)", marginBottom: 10 }} />
+          <div className="tnum" style={{ fontSize: 24, fontWeight: 900, color: "var(--green-ink)", letterSpacing: "-.02em", lineHeight: 1 }}>{fmt(incomeThisMonth)}</div>
+          <div style={{ fontSize: 12.5, color: "var(--ink)", fontWeight: 700, marginTop: 9 }}>סה״כ התקבל</div>
+          <div style={{ fontSize: 11, color: "var(--ink-2)", fontWeight: 500, marginTop: 4, lineHeight: 1.4 }}>שיעורים שסומנו כשולמו</div>
+        </Card>
+        <Card style={{ padding: "16px 16px" }}>
+          <div style={{ width: 8, height: 8, borderRadius: 999, background: "var(--amber)", marginBottom: 10 }} />
+          <div className="tnum" style={{ fontSize: 24, fontWeight: 900, color: "var(--amber-ink)", letterSpacing: "-.02em", lineHeight: 1 }}>{fmt(nextMonthTotal)}</div>
+          <div style={{ fontSize: 12.5, color: "var(--ink)", fontWeight: 700, marginTop: 9 }}>ממתין לתשלום</div>
+          <div style={{ fontSize: 11, color: "var(--ink-2)", fontWeight: 500, marginTop: 4, lineHeight: 1.4 }}>שיעורים שבוצעו ועדיין לא שולמו</div>
+        </Card>
+      </div>
+      <div style={{ fontSize: 11.5, color: "var(--ink-2)", fontWeight: 500, margin: "12px 4px 0", lineHeight: 1.5 }}>
+        מחושב מכל התלמידים יחד.
+      </div>
+      </>}
+
+      <div style={{ textAlign: "center", marginTop: 22, fontSize: 12, color: "#B6B6BC", fontWeight: 500 }}>מעקב שיעורים · גרסה 1.2</div>
+    </div>
+  );
+}
+
+/* ============ shared bits ============ */
+function ScreenHeader({ title, sub }) {
+  return (
+    <div style={{ padding: "2px 4px 16px" }}>
+      <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, letterSpacing: "-.02em" }}>{title}</h1>
+      {sub && <div style={{ fontSize: 13.5, color: "var(--ink-2)", fontWeight: 500, marginTop: 3 }}>{sub}</div>}
+    </div>
+  );
+}
+
+function EmptyState({ icon, text }) {
+  return (
+    <div style={{ textAlign: "center", padding: "54px 20px", color: "#C4C4CB" }}>
+      <div style={{ width: 64, height: 64, borderRadius: 20, background: "var(--empty-icon-bg)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px", color: "var(--text-xmuted)" }}>
+        <Icon name={icon} size={30} stroke={1.8} />
+      </div>
+      <div style={{ fontSize: 14.5, fontWeight: 600, color: "var(--ink-2)" }}>{text}</div>
+    </div>
+  );
+}
+
+function FAB({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      onMouseDown={(e) => (e.currentTarget.style.transform = "scale(.92)")}
+      onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      style={{
+        position: "absolute", bottom: 96, left: 20, zIndex: 40,
+        width: 60, height: 60, borderRadius: 22, background: "var(--accent)", color: "#fff",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        boxShadow: "var(--shadow-fab)", transition: "transform .12s ease",
+      }}
+    >
+      <Icon name="plus" size={28} stroke={2.6} />
+    </button>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   שכבת נתונים — localStorage (נקודת ההחלפה ל-Supabase בעתיד)
+   ════════════════════════════════════════════════════════════════ */
+const LS_KEY = "lesson-tracker-v2";
+
+// התחלה נקייה — בלי נתוני דמו. תלמידים ושיעורים נוצרים מתוך האפליקציה ונשמרים מקומית.
+const SEED_STUDENTS = [];
+const SEED_LESSONS = [];
+
+function loadPersisted() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { console.warn("load failed", e); }
+  return null;
+}
+const PERSISTED = loadPersisted();
+
+/* ============================ add lesson modal ============================ */
+const TODAY = new Date(); // תאריך אמיתי — האפליקציה חיה
+
+function AddLessonModal({ defaults, onClose, onAdd, centered }) {
+  const base = new Date(TODAY); base.setHours(18, 0, 0, 0);
+  const defDT = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, "0")}-${String(base.getDate()).padStart(2, "0")}T18:00`;
+  const [dt, setDt] = React.useState(defDT);
+  const [price, setPrice] = React.useState(defaults.price);
+  const [duration, setDuration] = React.useState(defaults.duration);
+  const [note, setNote] = React.useState("");
+  return (
+    <Sheet title="שיעור חדש" onClose={onClose} centered={centered}
+      footer={<BigButton variant="primary" icon="check" onClick={() => onAdd({ datetime: dt, price: +price, duration: +duration, note: note.trim() })}>הוספת שיעור</BigButton>}>
+      <label style={labelStyle}>תאריך ושעה</label>
+      <input type="datetime-local" value={dt} onChange={(e) => setDt(e.target.value)} style={{ ...fieldStyle, marginBottom: 16 }} />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+        <div>
+          <label style={labelStyle}>מחיר</label>
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontWeight: 700, color: "var(--ink-2)" }}>₪</span>
+            <input type="number" className="tnum" value={price} onChange={(e) => setPrice(e.target.value)} style={{ ...fieldStyle, paddingRight: 34 }} />
+          </div>
+        </div>
+        <div>
+          <label style={labelStyle}>משך (דק׳)</label>
+          <input type="number" className="tnum" value={duration} onChange={(e) => setDuration(e.target.value)} style={fieldStyle} />
+        </div>
+      </div>
+      <label style={labelStyle}>הערות</label>
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="על מה עבדתם בשיעור?" style={{ ...fieldStyle, resize: "none", lineHeight: 1.5 }} />
+    </Sheet>
+  );
+}
+
+/* ============================ APP ============================ */
+function App() {
+  const isDesktop = useIsDesktop(900);
+  const [dark, toggleDark] = useDarkMode();
+  const [tab, setTab] = React.useState("home");
+  const [students, setStudents] = React.useState(PERSISTED?.students ?? SEED_STUDENTS);
+  const [lessons, setLessons] = React.useState(PERSISTED?.lessons ?? SEED_LESSONS);
+  const [activeId, setActiveId] = React.useState(PERSISTED?.activeId ?? null);
+  const [modal, setModal] = React.useState(null);
+  const [saved, setSaved] = React.useState(false);
+  const scrollRef = React.useRef(null);
+
+  // ── persistence: שמירה אוטומטית בכל שינוי ──
+  React.useEffect(() => {
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ students, lessons, activeId })); }
+    catch (e) { console.warn("save failed", e); }
+  }, [students, lessons, activeId]);
+
+  React.useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0; }, [tab, activeId]);
+
+  // אם התלמיד הפעיל נמחק/לא קיים — חזרה לראשון
+  const active = students.find((s) => s.id === activeId) || students[0];
+  const myLessons = active ? lessons.filter((l) => l.studentId === active.id) : [];
+
+  const received = myLessons.filter((l) => l.status === "done" && l.paid).reduce((s, l) => s + l.price, 0);
+  const debt = myLessons.filter((l) => l.status === "done" && !l.paid).reduce((s, l) => s + l.price, 0);
+  const doneCount = myLessons.filter((l) => l.status === "done").length;
+  const nextLesson = myLessons.filter((l) => l.status === "scheduled").sort((a, b) => parseDT(a.datetime) - parseDT(b.datetime))[0];
+  const recent = [...myLessons].sort((a, b) => parseDT(b.datetime) - parseDT(a.datetime)).slice(0, 4);
+  const months = buildMonthly(myLessons);
+
+  const markDone = (id) => setLessons((ls) => ls.map((l) => (l.id === id ? { ...l, status: "done" } : l)));
+  const togglePaid = (id) => setLessons((ls) => ls.map((l) => (l.id === id ? { ...l, paid: !l.paid, paidAt: !l.paid ? new Date().toISOString() : null } : l)));
+  const deleteLesson = (id) => setLessons((ls) => ls.filter((l) => l.id !== id));
+  const addLesson = (d) => {
+    setLessons((ls) => [...ls, { id: "n" + Date.now(), studentId: active.id, status: "scheduled", paid: false, ...d }]);
+    setModal(null); setTab("lessons");
+  };
+  const addStudent = (d) => {
+    const id = "s" + Date.now();
+    const color = STUDENT_COLORS[students.length % STUDENT_COLORS.length];
+    setStudents((ss) => [...ss, { id, color, ...d }]);
+    setActiveId(id); setModal(null); setTab("home");
+  };
+  const updateStudent = (k, v) => setStudents((ss) => ss.map((s) => (s.id === active.id ? { ...s, [k]: v } : s)));
+  const saveSettings = () => { setSaved(true); setTimeout(() => setSaved(false), 1800); };
+
+  const renderScreen = (wide) => {
+    if (!active) return (
+      <div className="screen-in" style={{ paddingTop: wide ? 60 : 30 }}>
+        <EmptyState icon="addUser" text="עדיין אין תלמידים" />
+        <div style={{ maxWidth: 320, margin: "0 auto" }}>
+          <BigButton variant="primary" icon="addUser" onClick={() => setModal("student")}>הוסף תלמיד ראשון</BigButton>
+        </div>
+      </div>
+    );
+    switch (tab) {
+      case "home":
+        return <HomeScreen studentName={active.name} debt={debt} doneCount={doneCount} received={received}
+          nextLesson={nextLesson} recent={recent} months={months}
+          onAddLesson={() => setModal("lesson")} go={setTab} wide={wide} />;
+      case "lessons":
+        return <LessonsScreen lessons={myLessons} onMarkDone={markDone} onTogglePaid={togglePaid} onDelete={deleteLesson}
+          onAddLesson={() => setModal("lesson")} wide={wide} />;
+      case "payments":
+        return <PaymentsScreen lessons={myLessons} received={received} wide={wide} />;
+      case "summary":
+        return <SummaryScreen lessons={myLessons} today={TODAY} wide={wide} />;
+      case "settings":
+        return <SettingsScreen student={active} onChange={updateStudent} onSave={saveSettings} saved={saved} wide={wide} allLessons={lessons} today={TODAY} />;
+      default: return null;
+    }
+  };
+
+  const modals = (
+    <>
+      {modal === "lesson" && active && <AddLessonModal defaults={active} onClose={() => setModal(null)} onAdd={addLesson} centered={isDesktop} />}
+      {modal === "student" && <AddStudentModal onClose={() => setModal(null)} onAdd={addStudent} centered={isDesktop} />}
+    </>
+  );
+
+  if (isDesktop) {
+    return (
+      <ThemeCtx.Provider value={{ dark, toggleDark }}>
+        <div className="stage">
+          <div className="app desktop">
+            <Sidebar active={tab} onChange={setTab} students={students} activeId={active ? active.id : null}
+              onSelect={setActiveId} onAddStudent={() => setModal("student")} lessons={lessons} today={TODAY} />
+            <main className="main" ref={scrollRef}>{renderScreen(true)}</main>
+            {modals}
+          </div>
+        </div>
+      </ThemeCtx.Provider>
+    );
+  }
+
+  return (
+    <ThemeCtx.Provider value={{ dark, toggleDark }}>
+      <div className="stage">
+        <div className="app mobile">
+          <MobileHeader students={students} activeId={active ? active.id : null} onSelect={setActiveId} onAddStudent={() => setModal("student")} />
+          <div className="scroll" ref={scrollRef}>{renderScreen(false)}</div>
+          <TabBar active={tab} onChange={setTab} />
+          {modals}
+        </div>
+      </div>
+    </ThemeCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
