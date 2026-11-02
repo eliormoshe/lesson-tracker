@@ -303,6 +303,7 @@ function Icon({ name, size = 24, filled = false, stroke = 2 }) {
     moon: <path d="M21 12.5A9 9 0 1 1 11.5 3a7 7 0 0 0 9.5 9.5z" />,
     sun: <><circle cx="12" cy="12" r="4.5" /><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" /></>,
     trash: <><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" /></>,
+    edit: <><path d="M4 20h4L18.5 9.5a2.12 2.12 0 0 0-3-3L5 17v3z" /><path d="M13.5 6.5l3 3" /></>,
     lessons: <><rect x="3.5" y="4.5" width="17" height="16" rx="3" /><path d="M3.5 9h17M8 2.5v4M16 2.5v4" /><path d="M7.5 13h2M11 13h2M14.5 13h2M7.5 16.5h2M11 16.5h2" /></>,
     payments: <><rect x="2.5" y="5.5" width="19" height="13" rx="3" /><path d="M2.5 10h19" /><path d="M6 14.5h3" /></>,
     settings: <><circle cx="12" cy="12" r="3.2" /><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.7 5.3l-1.7 1.7M7 17l-1.7 1.7M18.7 18.7 17 17M7 7 5.3 5.3" /></>,
@@ -736,6 +737,7 @@ function AddStudentModal({ onClose, onAdd, centered }) {
 /* ============ date helpers ============ */
 const HE_DAYS = ["יום א׳", "יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת"];
 function parseDT(s) { return new Date(s); }
+function toLocalInput(s) { const d = new Date(s); const p = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
 function dDay(s) { return HE_DAYS[parseDT(s).getDay()]; }
 function dDate(s) { const d = parseDT(s); return `${d.getDate()} ${HE_MON_SHORT[d.getMonth()]}`; }
 function dTime(s) { const d = parseDT(s); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }
@@ -774,7 +776,7 @@ function nextCollection(lessons, today) {
 }
 
 /* ============ lesson card ============ */
-function LessonRow({ lesson, onMarkDone, onTogglePaid, onDelete }) {
+function LessonRow({ lesson, onMarkDone, onTogglePaid, onDelete, onEdit }) {
   const { datetime, status, price, note, duration, paid } = lesson;
   const isDone = status === "done";
   const [confirmDelete, setConfirmDelete] = React.useState(false);
@@ -798,9 +800,16 @@ function LessonRow({ lesson, onMarkDone, onTogglePaid, onDelete }) {
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
           <div className="tnum" style={{ fontSize: 20, fontWeight: 800, flexShrink: 0, color: status === "cancelled" ? "var(--text-xmuted)" : "var(--ink)", textDecoration: status === "cancelled" ? "line-through" : "none" }}>{fmt(price)}</div>
-          <button onClick={() => setConfirmDelete((v) => !v)} style={{ color: confirmDelete ? "#EF4444" : "var(--text-xmuted)", transition: "color .15s", padding: 2 }}>
-            <Icon name="trash" size={16} stroke={2} />
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {onEdit && (
+              <button onClick={() => onEdit(lesson)} title="עריכת שיעור" style={{ color: "var(--text-xmuted)", transition: "color .15s", padding: 2 }}>
+                <Icon name="edit" size={16} stroke={2} />
+              </button>
+            )}
+            <button onClick={() => setConfirmDelete((v) => !v)} style={{ color: confirmDelete ? "#EF4444" : "var(--text-xmuted)", transition: "color .15s", padding: 2 }}>
+              <Icon name="trash" size={16} stroke={2} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -939,7 +948,7 @@ function MonthlyList({ months, compact }) {
 }
 
 /* ============================ HOME ============================ */
-function HomeScreen({ studentName, debt, doneCount, received, nextLesson, recent, months, onAddLesson, go, wide }) {
+function HomeScreen({ studentName, debt, doneCount, received, nextLesson, recent, months, onAddLesson, onEdit, go, wide }) {
   const actions = (
     <div style={{ display: wide ? "flex" : "grid", flexDirection: "column", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
       <BigButton variant="primary" icon="plus" onClick={onAddLesson}>שיעור חדש</BigButton>
@@ -962,7 +971,7 @@ function HomeScreen({ studentName, debt, doneCount, received, nextLesson, recent
           <div>
             <SectionTitle action={<button onClick={() => go("lessons")} style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)" }}>הצג הכול</button>}>השיעורים האחרונים</SectionTitle>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {recent.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={() => {}} onTogglePaid={() => {}} />)}
+              {recent.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={() => {}} onTogglePaid={() => {}} onEdit={onEdit} />)}
             </div>
           </div>
           <div>
@@ -983,7 +992,7 @@ function HomeScreen({ studentName, debt, doneCount, received, nextLesson, recent
       </div>
       <SectionTitle action={<button onClick={() => go("lessons")} style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)" }}>הצג הכול</button>}>השיעורים האחרונים</SectionTitle>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {recent.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={() => {}} onTogglePaid={() => {}} />)}
+        {recent.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={() => {}} onTogglePaid={() => {}} onEdit={onEdit} />)}
       </div>
       <div style={{ marginTop: 18 }}>{actions}</div>
     </div>
@@ -991,7 +1000,7 @@ function HomeScreen({ studentName, debt, doneCount, received, nextLesson, recent
 }
 
 /* ============================ LESSONS ============================ */
-function LessonsScreen({ lessons, onMarkDone, onTogglePaid, onDelete, onAddLesson, wide }) {
+function LessonsScreen({ lessons, onMarkDone, onTogglePaid, onDelete, onAddLesson, onEdit, wide }) {
   const [tab, setTab] = React.useState("upcoming");
   const upcoming = lessons.filter((l) => l.status === "scheduled").sort((a, b) => parseDT(a.datetime) - parseDT(b.datetime));
   const history = lessons.filter((l) => l.status !== "scheduled").sort((a, b) => parseDT(b.datetime) - parseDT(a.datetime));
@@ -1011,7 +1020,7 @@ function LessonsScreen({ lessons, onMarkDone, onTogglePaid, onDelete, onAddLesso
       {list.length === 0
         ? <EmptyState icon="lessons" text={tab === "upcoming" ? "אין שיעורים מתוזמנים" : "אין שיעורים בהיסטוריה"} />
         : <div style={{ display: "grid", gridTemplateColumns: wide ? "1fr 1fr" : "1fr", gap: 12 }}>
-            {list.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={onMarkDone} onTogglePaid={onTogglePaid} onDelete={onDelete} />)}
+            {list.map((l) => <LessonRow key={l.id} lesson={l} onMarkDone={onMarkDone} onTogglePaid={onTogglePaid} onDelete={onDelete} onEdit={onEdit} />)}
           </div>}
       {!wide && <FAB onClick={onAddLesson} />}
       {wide && <div style={{ marginTop: 18, maxWidth: 320 }}><BigButton variant="primary" icon="plus" onClick={onAddLesson}>שיעור חדש</BigButton></div>}
@@ -1236,16 +1245,18 @@ const PERSISTED = loadPersisted();
 /* ============================ add lesson modal ============================ */
 const TODAY = new Date(); // תאריך אמיתי — האפליקציה חיה
 
-function AddLessonModal({ defaults, onClose, onAdd, centered }) {
+function AddLessonModal({ defaults, lesson, onClose, onAdd, onSave, centered }) {
+  const isEdit = !!lesson;
   const base = new Date(TODAY); base.setHours(18, 0, 0, 0);
   const defDT = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, "0")}-${String(base.getDate()).padStart(2, "0")}T18:00`;
-  const [dt, setDt] = React.useState(defDT);
-  const [price, setPrice] = React.useState(defaults.price);
-  const [duration, setDuration] = React.useState(defaults.duration);
-  const [note, setNote] = React.useState("");
+  const [dt, setDt] = React.useState(isEdit ? toLocalInput(lesson.datetime) : defDT);
+  const [price, setPrice] = React.useState(isEdit ? lesson.price : defaults.price);
+  const [duration, setDuration] = React.useState(isEdit ? lesson.duration : defaults.duration);
+  const [note, setNote] = React.useState(isEdit ? (lesson.note || "") : "");
+  const submit = () => { const data = { datetime: dt, price: +price, duration: +duration, note: note.trim() }; if (isEdit) onSave(lesson.id, data); else onAdd(data); };
   return (
-    <Sheet title="שיעור חדש" onClose={onClose} centered={centered}
-      footer={<BigButton variant="primary" icon="check" onClick={() => onAdd({ datetime: dt, price: +price, duration: +duration, note: note.trim() })}>הוספת שיעור</BigButton>}>
+    <Sheet title={isEdit ? "עריכת שיעור" : "שיעור חדש"} onClose={onClose} centered={centered}
+      footer={<BigButton variant="primary" icon="check" onClick={submit}>{isEdit ? "שמירת שינויים" : "הוספת שיעור"}</BigButton>}>
       <label style={labelStyle}>תאריך ושעה</label>
       <input type="datetime-local" value={dt} onChange={(e) => setDt(e.target.value)} style={{ ...fieldStyle, marginBottom: 16 }} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
@@ -1276,6 +1287,7 @@ function App() {
   const [lessons, setLessons] = React.useState(PERSISTED?.lessons ?? SEED_LESSONS);
   const [activeId, setActiveId] = React.useState(PERSISTED?.activeId ?? null);
   const [modal, setModal] = React.useState(null);
+  const [editing, setEditing] = React.useState(null);
   const [saved, setSaved] = React.useState(false);
   const scrollRef = React.useRef(null);
 
@@ -1301,6 +1313,7 @@ function App() {
   const markDone = (id) => setLessons((ls) => ls.map((l) => (l.id === id ? { ...l, status: "done" } : l)));
   const togglePaid = (id) => setLessons((ls) => ls.map((l) => (l.id === id ? { ...l, paid: !l.paid, paidAt: !l.paid ? new Date().toISOString() : null } : l)));
   const deleteLesson = (id) => setLessons((ls) => ls.filter((l) => l.id !== id));
+  const editLesson = (id, d) => { setLessons((ls) => ls.map((l) => (l.id === id ? { ...l, ...d } : l))); setEditing(null); };
   const addLesson = (d) => {
     setLessons((ls) => [...ls, { id: "n" + Date.now(), studentId: active.id, status: "scheduled", paid: false, ...d }]);
     setModal(null); setTab("lessons");
@@ -1327,10 +1340,10 @@ function App() {
       case "home":
         return <HomeScreen studentName={active.name} debt={debt} doneCount={doneCount} received={received}
           nextLesson={nextLesson} recent={recent} months={months}
-          onAddLesson={() => setModal("lesson")} go={setTab} wide={wide} />;
+          onAddLesson={() => setModal("lesson")} onEdit={setEditing} go={setTab} wide={wide} />;
       case "lessons":
         return <LessonsScreen lessons={myLessons} onMarkDone={markDone} onTogglePaid={togglePaid} onDelete={deleteLesson}
-          onAddLesson={() => setModal("lesson")} wide={wide} />;
+          onAddLesson={() => setModal("lesson")} onEdit={setEditing} wide={wide} />;
       case "payments":
         return <PaymentsScreen lessons={myLessons} received={received} wide={wide} />;
       case "summary":
@@ -1344,6 +1357,7 @@ function App() {
   const modals = (
     <>
       {modal === "lesson" && active && <AddLessonModal defaults={active} onClose={() => setModal(null)} onAdd={addLesson} centered={isDesktop} />}
+      {editing && active && <AddLessonModal lesson={editing} defaults={active} onClose={() => setEditing(null)} onSave={editLesson} centered={isDesktop} />}
       {modal === "student" && <AddStudentModal onClose={() => setModal(null)} onAdd={addStudent} centered={isDesktop} />}
     </>
   );
